@@ -22,9 +22,10 @@ const LoginScreen = ({ navigation }) => {
       return;
     }
     console.log('Login:', { email, password });
-    Alert.alert('Uspješno!', 'Prijavljivanje uspješno (test)');
+    Alert.alert('Uspješno!', 'Dobrodošli u Parking Papak!', [
+      { text: 'OK', onPress: () => navigation.navigate('Home') }
+    ]);
   };
-
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
@@ -47,9 +48,13 @@ const LoginScreen = ({ navigation }) => {
             <TextInput style={styles.input} placeholder="********" placeholderTextColor="#999"
               value={password} onChangeText={setPassword} secureTextEntry />
 
-            <TouchableOpacity>
-              <Text style={styles.forgotPassword}>Zaboravljena lozinka?</Text>
-            </TouchableOpacity>
+            <TouchableOpacity onPress={() => Alert.alert(
+  "Zaboravljena lozinka",
+  "Link za resetovanje lozinke je poslan na vaš e-mail.",
+  [{ text: "OK" }]
+)}>
+  <Text style={styles.forgotPassword}>Zaboravljena lozinka?</Text>
+</TouchableOpacity>
 
             <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
               <Text style={styles.loginButtonText}>Prijavi se</Text>

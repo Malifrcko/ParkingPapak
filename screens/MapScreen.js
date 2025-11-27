@@ -8,10 +8,18 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
 import * as Location from 'expo-location';
 import { Ionicons } from '@expo/vector-icons';
+
+// Import react-native-maps ONLY on native (iOS/Android)
+let MapView, Marker;
+if (Platform.OS !== "web") {
+  const Maps = require("react-native-maps");
+  MapView = Maps.default;
+  Marker = Maps.Marker;
+}
 
 const MapScreen = ({ navigation }) => {
   const [location, setLocation] = useState(null);
@@ -19,6 +27,12 @@ const MapScreen = ({ navigation }) => {
   const mapRef = useRef(null);
 
   useEffect(() => {
+    // Don't try to get GPS on web — it causes issues when the map is disabled
+    if (Platform.OS === "web") {
+      setLoading(false);
+      return;
+    }
+
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
@@ -34,7 +48,7 @@ const MapScreen = ({ navigation }) => {
   }, []);
 
   const goToMyLocation = async () => {
-    if (!location) return;
+    if (!location || Platform.OS === "web") return;
 
     mapRef.current?.animateToRegion({
       latitude: location.latitude,
@@ -44,6 +58,29 @@ const MapScreen = ({ navigation }) => {
     }, 1000);
   };
 
+  // 🌐 WEB FALLBACK VIEW
+  if (Platform.OS === "web") {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Ionicons name="arrow-back" size={28} color="#fff" />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Mapa prijava</Text>
+          <View style={{ width: 28 }} />
+        </View>
+
+        <View style={styles.webFallback}>
+          <Ionicons name="map-outline" size={80} color="#999" />
+          <Text style={styles.webFallbackText}>
+            Mapa nije dostupna u web verziji.
+          </Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  // 📱 NATIVE VERSION (ANDROID + IOS)
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
@@ -66,7 +103,6 @@ const MapScreen = ({ navigation }) => {
           ref={mapRef}
           style={styles.map}
           showsUserLocation={true}
-          // followsUserLocation={false} ← isključeno da možeš slobodno roamati
           initialRegion={{
             latitude: location?.latitude || 43.8563,
             longitude: location?.longitude || 18.4131,
@@ -87,7 +123,7 @@ const MapScreen = ({ navigation }) => {
         </MapView>
       )}
 
-      {/* Dugme za centriranje na trenutnu lokaciju */}
+      {/* Dugme za centriranje */}
       <TouchableOpacity style={styles.myLocationButton} onPress={goToMyLocation}>
         <Ionicons name="locate" size={32} color="#fff" />
       </TouchableOpacity>
@@ -137,6 +173,19 @@ const styles = StyleSheet.create({
     shadowColor: '#000',
     shadowOpacity: 0.3,
     shadowRadius: 6,
+  },
+
+  // 🌐 Web fallback styling
+  webFallback: {
+    flex: 1,
+    marginTop: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  webFallbackText: {
+    marginTop: 15,
+    fontSize: 18,
+    color: '#555',
   },
 });
 

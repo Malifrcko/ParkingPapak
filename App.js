@@ -12,6 +12,7 @@ import LocationScreen from './screens/LocationScreen';
 import OffenceScreen from './screens/OffenceScreen';
 import SuccessScreen from './screens/SuccessScreen';
 
+
 const Stack = createNativeStackNavigator();
 
 export default function App() {
@@ -28,6 +29,7 @@ export default function App() {
         <Stack.Screen name="Location" component={LocationScreen} />
         <Stack.Screen name="Offence" component={OffenceScreen} />
         <Stack.Screen name="Success" component={SuccessScreen} />
+        
       </Stack.Navigator>
     </NavigationContainer>
   );
